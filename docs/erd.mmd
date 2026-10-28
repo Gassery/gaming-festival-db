@@ -1,0 +1,35 @@
+erDiagram
+    EXHIBITORS ||--o{ EXHIBITOR_TYPES : holds
+    TYPES      ||--o{ EXHIBITOR_TYPES : classifies
+    EXHIBITORS ||--o{ PRODUCT_CATEGORIES : lists
+    CATEGORIES ||--o{ PRODUCT_CATEGORIES : groups
+    EXHIBITORS ||--o{ ACTIVITIES : hosts
+
+    EXHIBITORS {
+        text exhibitor PK
+        text booth UK
+    }
+    TYPES {
+        text type PK
+    }
+    EXHIBITOR_TYPES {
+        text exhibitor PK,FK
+        text type PK,FK
+    }
+    CATEGORIES {
+        text category PK
+    }
+    PRODUCT_CATEGORIES {
+        text exhibitor PK,FK
+        text product_category PK,FK
+    }
+    ACTIVITIES {
+        int  activity_id PK
+        text title
+        date start_date
+        date end_date
+        time start_time
+        time end_time
+        text location
+        text exhibitor FK
+    }

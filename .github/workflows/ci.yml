@@ -1,0 +1,42 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  database:
+    runs-on: ubuntu-latest
+    env:
+      PGPASSWORD: postgres
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: festival
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d festival"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply schema and seed
+        run: |
+          psql -h localhost -U postgres -d festival -v ON_ERROR_STOP=1 -q -f schema.sql
+          psql -h localhost -U postgres -d festival -v ON_ERROR_STOP=1 -q -f seed.sql
+
+      - name: Run queries
+        run: |
+          for file in queries/*.sql; do
+            echo "::group::$file"
+            psql -h localhost -U postgres -d festival -v ON_ERROR_STOP=1 -f "$file"
+            echo "::endgroup::"
+          done
+
+      - name: Assertions
+        run: psql -h localhost -U postgres -d festival -v ON_ERROR_STOP=1 -f tests/assert.sql
